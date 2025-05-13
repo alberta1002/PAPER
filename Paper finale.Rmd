@@ -30,6 +30,11 @@ data.ita$q3_2[data.ita$q3_2 == 998] <- NA
 data.ita$q3_3[data.ita$q3_3 == 998] <- NA
 
 
+# education
+data.ita$education[data.ita$education == (999|998)] <- NA
+data.ita$edu <- NA
+data.ita$edu[data.ita$education == (176:180)] <- 1
+
 ```
 
 
@@ -45,34 +50,55 @@ mean_q1_2
 mean(c(mean_q1_1, mean_q1_2))
 
 
-barplot(prop.table(table(data.ita$q1_1)))
+barplot(prop.table(table(data.ita$q1_1))) # irrilevante?
 #sistemare assi, etichette, titolo ecc
 
-barplot(prop.table(table(data.ita$q1_2)))
+barplot(prop.table(table(data.ita$q1_2))) # irrilevante?
 #sistemare assi, etichette, titolo ecc
 
 
+data.ita$q1 <- ((data.ita$q1_1 + data.ita$q1_2)/2) # creata colonna nuova
+
+barplot(prop.table(table(data.ita$q1))) #barplot colonna nuova
+#sistemare assi, etichette, titolo ecc.
 
 
+
+hist(data.ita$q1) #usare bar plot o istogramma?
+
+
+## sex
 prop.table(table(data.ita$sex, data.ita$q1_1), 1)
 prop.table(table(data.ita$sex, data.ita$q1_2), 1)
+prop.table(table(data.ita$sex, data.ita$q1), 1) # prop table colonna nuova
+
 
 barplot(prop.table(table(data.ita$sex, data.ita$q1_1), 1), beside = TRUE)
 barplot(prop.table(table(data.ita$sex, data.ita$q1_2), 1), beside = TRUE)
 
+barplot(prop.table(table(data.ita$sex, data.ita$q1), 1), beside = TRUE) # nero uomini, ,bianco donne
 
 
 
-barplot(prop.table(table(data.ita$q1_1, data.ita$age_class)), beside = TRUE) # trovare le proporzioni all'interno della classe d'età
 
-prop.table(table(data.ita$age_class))
+## età
+prop.table(table(data.ita$q1, data.ita$age_class), 2)
+barplot(prop.table(table(data.ita$q1, data.ita$age_class), 2), beside = TRUE) # proporzioni all'interno della classe d'età
 
 
 
+## regioni
 tapply(data.ita$q1_1, data.ita$region, mean, na.rm = TRUE) # quindi si possono paccare ulteriori indagini geografiche?!
 
-tapply(data.ita$q1_1, data.ita$residence, mean, na.rm = TRUE)
-tapply(data.ita$q1_1, data.ita$partner, mean, na.rm = TRUE)
+tapply(data.ita$q1, data.ita$region, mean, na.rm = TRUE)
 
+
+# residence
+tapply(data.ita$q1_1, data.ita$residence, mean, na.rm = TRUE)
+tapply(data.ita$q1, data.ita$residence, mean, na.rm = TRUE)
+
+## parter
+tapply(data.ita$q1_1, data.ita$partner, mean, na.rm = TRUE)
+tapply(data.ita$q1, data.ita$partner, mean, na.rm = TRUE)
 
 ```
