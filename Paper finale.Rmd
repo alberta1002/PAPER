@@ -5,14 +5,14 @@ output: html_document
 
 ```{r}
 data <- read.csv("dataset.csv")
-data.ita <- subset(data, select = c("d1", "d1r2", "dx2", "dx4", "d13", "dx21", "d12it_r", "q1_1", "q1_3", "q1_5", "q1_6", "q2_2", "q3_2", "q1_4"), subset = data$isocntry == "IT")
+data.ita <- subset(data, select = c("d1", "d1r2", "dx2", "dx4", "d13", "dx21", "d12it_r", "q1_1", "q1_2", "q1_3", "q1_4", "q1_5", "q1_6"), subset = data$isocntry == "IT") 
 
 data.ita$d12it_r <- factor(data.ita$d12it_r, levels = 1:5, labels = c("NO", "NE", "CE", "SUD", "IS"))
 
-colnames(data.ita)[1:14] <- c("age", "age_class", "sex", "education", "residence", "partner", "region", "q1_1", "q1_2", "q2_1", "q2_2", "q3_1", "q3_2", "q3_3")
+colnames(data.ita)[1:13] <- c("age", "age_class", "sex", "edu", "residence", "partner", "region", "q1_1", "q1_2", "q1_3", "q2_1", "q2_2", "q2_3")
 
 data.ita$sex[data.ita$sex == 999] <- NA
-data.ita$sex <- factor(data.ita$sex, levels = c(1, 2), labels = c("male", "female"))
+data.ita$sex <- factor(data.ita$sex, levels = c(1, 2), labels = c(0, 1)) # 0 uomini, 1 donne
 
 data.ita$residence[data.ita$residence == 998] <- NA
 data.ita$residence <- factor(data.ita$residence, levels = c(1, 2, 3), labels = c("village", "town", "city"))
@@ -20,77 +20,236 @@ data.ita$residence <- factor(data.ita$residence, levels = c(1, 2, 3), labels = c
 data.ita$partner[data.ita$prtner == (999|998)] <- NA
 data.ita$partner <- factor(data.ita$partner, levels = c(1, 2), labels = c("yes", "no"))
 
-
 data.ita$q1_1[data.ita$q1_1 == 998] <- NA
 data.ita$q1_2[data.ita$q1_2 == 998] <- NA
+data.ita$q1_3[data.ita$q1_3 == 998] <- NA
 data.ita$q2_1[data.ita$q2_1 == 998] <- NA
 data.ita$q2_2[data.ita$q2_2 == 998] <- NA
-data.ita$q3_1[data.ita$q3_1 == 998] <- NA
-data.ita$q3_2[data.ita$q3_2 == 998] <- NA
-data.ita$q3_3[data.ita$q3_3 == 998] <- NA
-
+data.ita$q2_3[data.ita$q2_3 == 998] <- NA
 
 # education
-data.ita$education[data.ita$education == (999|998)] <- NA
-data.ita$edu <- NA
-data.ita$edu[data.ita$education == (176:180)] <- 1
+data.ita$edu[data.ita$education == (999|998)] <- NA
+data.ita$education <- NA
+data.ita$education[data.ita$edu >= 176 & data.ita$edu <= 180] <- 1
+data.ita$education[data.ita$edu >= 181 & data.ita$edu <= 185] <- 2
+data.ita$education[data.ita$edu >= 186 & data.ita$edu <= 191] <- 3
+
+data.ita$education <- factor(data.ita$education, 
+         levels = 1:3, 
+         labels = c("low education", "medium education", "high education"))
+
 
 ```
 
-
 ```{r}
-# percezione di genere: domande q1_1, q1_2
-
+# percezione di genere: domande q1_1, q1_2, q1_3 --> indice 1
 mean_q1_1 <- mean(data.ita$q1_1, na.rm = TRUE)
 mean_q1_1
 
 mean_q1_2 <- mean(data.ita$q1_2, na.rm = TRUE)
 mean_q1_2
 
-mean(c(mean_q1_1, mean_q1_2))
+mean_q1_3 <- mean(data.ita$q1_3, na.rm = TRUE)
+mean_q1_3
 
+mean(c(mean_q1_1, mean_q1_2, mean_q1_3))
 
-barplot(prop.table(table(data.ita$q1_1))) # irrilevante?
+```
+```{r}
+# controllo/possesso: domande q2_1, q2_2, q2_3 --> indice 2
+mean_q2_1 <- mean(data.ita$q2_1, na.rm = TRUE)
+mean_q2_1
+
+mean_q2_2 <- mean(data.ita$q2_2, na.rm = TRUE)
+mean_q2_2
+
+mean_q2_3 <- mean(data.ita$q2_3, na.rm = TRUE)
+mean_q2_3
+
+mean(c(mean_q2_1, mean_q2_2, mean_q2_3))
+
+```
+```{r}
+# istogramma indice 1
+
+barplot(prop.table(table(data.ita$q1_1)), ylim = c(0, 1) ) # irrilevante
+barplot(prop.table(table(data.ita$q1_2)), ylim = c(0, 1) ) # irrilevante
+barplot(prop.table(table(data.ita$q1_3)), ylim = c(0, 1) ) # irrilevante
 #sistemare assi, etichette, titolo ecc
 
-barplot(prop.table(table(data.ita$q1_2))) # irrilevante?
+data.ita$q1 <- ((data.ita$q1_1 + data.ita$q1_2 + data.ita$q1_3)/3) # creata colonna nuova. renderlo più prestigioso
+
+hist(data.ita$q1, breaks = seq(1, 3, 0.5), main = "Indice 1 percezioni istogramma", xlab = "inaccettabile --> accettabile", ylab = "freq rel", freq = FALSE)
+# perché la densità è maggiore di 1???
+```
+
+
+```{r}
+# istogramma indice 2
+
+barplot(prop.table(table(data.ita$q2_1)), ylim = c(0, 1)) # irrilevante?
+barplot(prop.table(table(data.ita$q2_2)), ylim = c(0, 1)) # irrilevante?
+barplot(prop.table(table(data.ita$q2_3)), ylim = c(0, 1)) # irrilevante?
 #sistemare assi, etichette, titolo ecc
 
+data.ita$q2 <- ((data.ita$q2_1 + data.ita$q2_2 + data.ita$q2_3)/3) # creata colonna nuova. renderlo più prestigioso
 
-data.ita$q1 <- ((data.ita$q1_1 + data.ita$q1_2)/2) # creata colonna nuova
+hist(data.ita$q2, breaks = seq(1, 3, 0.5), main = "Indice 2 percezioni istogramma", xlab = "inaccettabile --> accettabile", ylab = "freq rel", freq = FALSE)
+# perché la densità è maggiore di 1???
+```
+```{r}
+## divisione breaks preliminare
 
-barplot(prop.table(table(data.ita$q1))) #barplot colonna nuova
-#sistemare assi, etichette, titolo ecc.
+# indice 1
+data.ita$q1_s <- NA
+data.ita$q1_s[data.ita$q1 >= 1 & data.ita$q1 <= 1.5] <- 1
+data.ita$q1_s[data.ita$q1 >1.5 & data.ita$q1 <= 2] <- 2
+data.ita$q1_s[data.ita$q1 > 2 & data.ita$q1 <= 2.5] <- 3
+data.ita$q1_s[data.ita$q1 > 2.5 & data.ita$q1 <= 3] <- 4
 
-
-
-hist(data.ita$q1) #usare bar plot o istogramma?
-
-
-## sex
-prop.table(table(data.ita$sex, data.ita$q1_1), 1)
-prop.table(table(data.ita$sex, data.ita$q1_2), 1)
-prop.table(table(data.ita$sex, data.ita$q1), 1) # prop table colonna nuova
-
-
-barplot(prop.table(table(data.ita$sex, data.ita$q1_1), 1), beside = TRUE)
-barplot(prop.table(table(data.ita$sex, data.ita$q1_2), 1), beside = TRUE)
-
-barplot(prop.table(table(data.ita$sex, data.ita$q1), 1), beside = TRUE) # nero uomini, ,bianco donne
+data.ita$q1_s <- factor(data.ita$q1_s, 
+         levels = 1:4, 
+         labels = c("1.0-1.5", "1.6-2.0", "2.1-2.5", "2.6-3.0"))
 
 
+# indice 2
+data.ita$q2_s <- NA
+data.ita$q2_s[data.ita$q2 >= 1 & data.ita$q2 <= 1.5] <- 1
+data.ita$q2_s[data.ita$q2 >1.5 & data.ita$q2 <= 2] <- 2
+data.ita$q2_s[data.ita$q2 > 2 & data.ita$q2 <= 2.5] <- 3
+data.ita$q2_s[data.ita$q2 > 2.5 & data.ita$q2 <= 3] <- 4
+
+data.ita$q2_s <- factor(data.ita$q2_s, 
+         levels = 1:4, 
+         labels = c("1.0-1.5", "1.6-2.0", "2.1-2.5", "2.6-3.0"))
 
 
-## età
-prop.table(table(data.ita$q1, data.ita$age_class), 2)
-barplot(prop.table(table(data.ita$q1, data.ita$age_class), 2), beside = TRUE) # proporzioni all'interno della classe d'età
+
+```
 
 
 
+
+
+```{r}
+##sex
+
+# indice 1
+table_sex_1 <- prop.table(table(data.ita$sex, data.ita$q1_s), 1) # prop table colonna nuova
+rownames(table_sex_1) <- c("male", "female")
+table_sex_1
+
+sex_regr_1 <- lm(data.ita$q1 ~ data.ita$sex)
+sex_regr_1
+plot(data.ita$sex, data.ita$q1)
+abline(sex_regr_1)
+
+barplot(prop.table(table(data.ita$sex, data.ita$q1_s), 1), beside = TRUE) # aggiungere titolo e legenda con uomo e donna
+
+tapply(data.ita$q1, data.ita$sex, mean, na.rm = TRUE)
+
+
+# indice 2
+table_sex_2 <- prop.table(table(data.ita$sex, data.ita$q2_s), 1) # prop table colonna nuova
+rownames(table_sex_2) <- c("male", "female")
+table_sex_2
+
+sex_regr_2 <- lm(data.ita$q2 ~ data.ita$sex)
+sex_regr_2
+plot(data.ita$sex, data.ita$q2)
+abline(sex_regr_2)
+
+barplot(prop.table(table(data.ita$sex, data.ita$q2_s), 1), beside = TRUE) # aggiungere titolo e legenda con uomo e donna
+
+tapply(data.ita$q2, data.ita$sex, mean, na.rm = TRUE)
+
+
+## bisogna confrontare i due indici. magari trovare ATE?! boh
+
+```
+
+```{r}
+# indice 1
+table_age_1 <- prop.table(table(data.ita$age_class, data.ita$q1_s), 1)
+rownames(table_age_1) <- c("18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+table_age_1
+
+
+
+tapply(data.ita$q1, data.ita$age_class, mean, na.rm = TRUE)
+barplot(tapply(data.ita$q1, data.ita$age_class, mean, na.rm = TRUE), ylim = c(0, 1.5))
+par(new = TRUE)
+abline(h = 1.208489, lty = 2, col = "darkblue") # trovare modo più elegante per dire il numero
+
+
+
+# indice 2
+table_age_2 <- prop.table(table(data.ita$age_class, data.ita$q2_s), 1)
+rownames(table_age_2) <- c("18-24", "25-34", "35-44", "45-54", "55-64", "65+")
+table_age_2
+
+
+tapply(data.ita$q2, data.ita$age_class, mean, na.rm = TRUE)
+barplot(tapply(data.ita$q2, data.ita$age_class, mean, na.rm = TRUE), ylim = c(0, 1.5))
+par(new = TRUE)
+abline(h = 1.178744, lty = 2, col = "darkblue") # trovare modo più elegante per dire il numero
+
+## bisogna confrontare i due indici. magari trovare ATE?! boh
+
+```
+
+```{r}
 ## regioni
-tapply(data.ita$q1_1, data.ita$region, mean, na.rm = TRUE) # quindi si possono paccare ulteriori indagini geografiche?!
 
+# Indice 1
 tapply(data.ita$q1, data.ita$region, mean, na.rm = TRUE)
+
+# Indice 2
+tapply(data.ita$q2, data.ita$region, mean, na.rm = TRUE)
+
+
+
+# variazione nelle isole
+prop.table(table(data.ita$sex[data.ita$region == "IS"], data.ita$q1_s[data.ita$region == "IS"]), 1)
+prop.table(table(data.ita$sex[data.ita$region == "IS"], data.ita$q2_s[data.ita$region == "IS"]), 1)
+
+# variazione nel centro
+prop.table(table(data.ita$sex[data.ita$region == "CE"], data.ita$q1_s[data.ita$region == "CE"]), 1)
+prop.table(table(data.ita$sex[data.ita$region == "CE"], data.ita$q2_s[data.ita$region == "CE"]), 1)
+
+
+# donne divise per regioni
+tapply(data.ita$q1[data.ita$sex == 1], data.ita$region[data.ita$sex == 1], mean, na.rm = TRUE)
+tapply(data.ita$q2[data.ita$sex == 1], data.ita$region[data.ita$sex == 1], mean, na.rm = TRUE)
+
+#uomini divisi per regioni
+tapply(data.ita$q1[data.ita$sex == 0], data.ita$region[data.ita$sex == 0], mean, na.rm = TRUE)
+tapply(data.ita$q2[data.ita$sex == 0], data.ita$region[data.ita$sex == 0], mean, na.rm = TRUE)
+```
+
+```{r}
+# residence
+# Indice 1
+tapply(data.ita$q1, data.ita$residence, mean, na.rm = TRUE)
+
+tapply(data.ita$q1[data.ita$residence == "village"], data.ita$sex[data.ita$residence == "village"], mean, na.rm = TRUE)
+tapply(data.ita$q1[data.ita$residence == "town"], data.ita$sex[data.ita$residence == "town"], mean, na.rm = TRUE)
+tapply(data.ita$q1[data.ita$residence == "city"], data.ita$sex[data.ita$residence == "city"], mean, na.rm = TRUE)
+
+# Indice 2
+tapply(data.ita$q2, data.ita$residence, mean, na.rm = TRUE)
+
+tapply(data.ita$q2[data.ita$residence == "village"], data.ita$sex[data.ita$residence == "village"], mean, na.rm = TRUE)
+tapply(data.ita$q2[data.ita$residence == "town"], data.ita$sex[data.ita$residence == "town"], mean, na.rm = TRUE)
+tapply(data.ita$q2[data.ita$residence == "city"], data.ita$sex[data.ita$residence == "city"], mean, na.rm = TRUE)
+
+```
+
+
+
+
+
+```{r}
 
 
 # residence
