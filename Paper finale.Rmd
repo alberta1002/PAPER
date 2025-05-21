@@ -145,7 +145,7 @@ sex_regr_1
 plot(data.ita$sex, data.ita$q1)
 abline(sex_regr_1)
 
-barplot(prop.table(table(data.ita$sex, data.ita$q1_s), 1), beside = TRUE) # aggiungere titolo e legenda con uomo e donna
+barplot(prop.table(table(data.ita$sex, data.ita$q1_s), 1), beside = TRUE, main = "index 1 - differences in answers by sex", legend.text = c("male", "female"), col = c("orange", "purple")) 
 
 tapply(data.ita$q1, data.ita$sex, mean, na.rm = TRUE)
 
@@ -160,7 +160,7 @@ sex_regr_2
 plot(data.ita$sex, data.ita$q2)
 abline(sex_regr_2)
 
-barplot(prop.table(table(data.ita$sex, data.ita$q2_s), 1), beside = TRUE) # aggiungere titolo e legenda con uomo e donna
+barplot(prop.table(table(data.ita$sex, data.ita$q2_s), 1), beside = TRUE, main = "index 2 - differences in answers by sex", legend.text = c("male", "female"), col = c("orange", "purple")) 
 
 tapply(data.ita$q2, data.ita$sex, mean, na.rm = TRUE)
 
@@ -170,6 +170,7 @@ tapply(data.ita$q2, data.ita$sex, mean, na.rm = TRUE)
 ```
 
 ```{r}
+# età
 # indice 1
 table_age_1 <- prop.table(table(data.ita$age_class, data.ita$q1_s), 1)
 rownames(table_age_1) <- c("18-24", "25-34", "35-44", "45-54", "55-64", "65+")
@@ -196,6 +197,8 @@ par(new = TRUE)
 abline(h = 1.178744, lty = 2, col = "darkblue") # trovare modo più elegante per dire il numero
 
 ## bisogna confrontare i due indici. magari trovare ATE?! boh
+
+
 
 ```
 
@@ -252,14 +255,9 @@ tapply(data.ita$q2[data.ita$residence == "city"], data.ita$sex[data.ita$residenc
 
 ```{r}
 
-
-# residence
-tapply(data.ita$q1_1, data.ita$residence, mean, na.rm = TRUE)
-tapply(data.ita$q1, data.ita$residence, mean, na.rm = TRUE)
-
 ## parter
-tapply(data.ita$q1_1, data.ita$partner, mean, na.rm = TRUE)
 tapply(data.ita$q1, data.ita$partner, mean, na.rm = TRUE)
+tapply(data.ita$q2, data.ita$partner, mean, na.rm = TRUE)
 
 ```
 
@@ -286,12 +284,47 @@ abline(fit)
 
 summary(fit)
 
-plot(data.ita$edu_n, data.ita$q2)
-
-plot(data.ita$edu, data.ita$q2)
-
-
 barplot(tapply(data.ita$q2, data.ita$education, mean, na.rm = TRUE))
+
+
+
+```
+
+
+```{r}
+data.ita$education.dico <- NA
+data.ita$education.dico[data.ita$edu >= 176 & data.ita$edu <= 182] <- 0
+data.ita$education.dico[data.ita$edu >= 183 & data.ita$edu <= 191] <- 1
+
+tapply(data.ita$q1, data.ita$education.dico, mean, na.rm = TRUE)
+tapply(data.ita$q2, data.ita$education.dico, mean, na.rm = TRUE)
+
+regr_edu_q1 <- lm(data.ita$q1 ~ data.ita$education.dico)
+regr_edu_q1
+
+regr_edu_q2 <- lm(data.ita$q2 ~ data.ita$education.dico)
+regr_edu_q2
+
+```
+
+
+
+```{r}
+# mettiamo insieme sesso ed educazione
+
+regr_sex_edu_2 <- lm(data.ita$q2 ~ sex + education.dico, data = data.ita)
+regr_sex_edu_2$coefficients
+
+regr_sex_edu_1 <- lm(data.ita$q1 ~ sex + education.dico, data = data.ita)
+regr_sex_edu_1$coefficients
+
+
+
+
+regr_sex_education_2_prova <- lm(data.ita$q2 ~ sex + education, data = data.ita)
+regr_sex_education_2_prova
+
+
 
 ```
 
