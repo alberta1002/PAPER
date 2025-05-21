@@ -28,7 +28,8 @@ data.ita$q2_2[data.ita$q2_2 == 998] <- NA
 data.ita$q2_3[data.ita$q2_3 == 998] <- NA
 
 # education
-data.ita$edu[data.ita$education == (999|998)] <- NA
+data.ita$edu[data.ita$edu == 999]<- NA
+data.ita$edu[data.ita$edu == 998]<- NA
 data.ita$education <- NA
 data.ita$education[data.ita$edu >= 176 & data.ita$edu <= 180] <- 1
 data.ita$education[data.ita$edu >= 181 & data.ita$edu <= 185] <- 2
@@ -261,3 +262,38 @@ tapply(data.ita$q1_1, data.ita$partner, mean, na.rm = TRUE)
 tapply(data.ita$q1, data.ita$partner, mean, na.rm = TRUE)
 
 ```
+
+
+
+```{r}
+#education
+
+tapply(data.ita$q1, data.ita$education, mean, na.rm = TRUE)
+tapply(data.ita$q2, data.ita$education, mean, na.rm = TRUE)
+
+
+data.ita$edu_n <- NA
+data.ita$edu_n[data.ita$edu >= 176 & data.ita$edu <= 180] <- 1
+data.ita$edu_n[data.ita$edu >= 181 & data.ita$edu <= 185] <- 2
+data.ita$edu_n[data.ita$edu >= 186 & data.ita$edu <= 191] <- 3
+
+
+fit <- lm(data.ita$q2 ~ data.ita$edu_n)
+fit
+
+boxplot(data.ita$q2 ~ data.ita$edu_n)
+abline(fit)
+
+summary(fit)
+
+plot(data.ita$edu_n, data.ita$q2)
+
+plot(data.ita$edu, data.ita$q2)
+
+
+barplot(tapply(data.ita$q2, data.ita$education, mean, na.rm = TRUE))
+
+```
+
+
+
